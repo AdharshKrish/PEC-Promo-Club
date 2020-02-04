@@ -203,6 +203,47 @@ function autoLogin() {
     login.style.display = "none";
     home.style.display = "block";
     dispname.innerHTML = user.displayName;}
+    getPost();
   });
  
+}
+
+function addpost(){
+  let database = firebase.database();
+  // postId="vcajbsjq";
+  // database.ref('posts/' + postId + '/starCount').once('value').then(function (snapshot) {
+  //   console.log(snapshot.val());
+  // });
+  // postId="something";
+  postId = database.ref('posts/').push().key;
+  database.ref('posts/' + postId + '/content').set(newpost.value);
+  database.ref('posts/' + postId + '/starCount').set(0);
+  getPost();
+}
+
+function getPost(){
+  postContainer.innerHTML="";
+  let database = firebase.database();
+  let ref=database.ref('posts/');
+  ref.once('value', function (snapshot) {
+    snapshot.forEach(function (childSnapshot) {
+      // var childKey = childSnapshot.key;
+      let childData = childSnapshot.val();
+      // console.log(childData);
+      // console.log(childData["content"]);
+
+      // var eachpost = document.createElement("eachpost");                 // Create a <p> element
+      // eachpost.innerHTML = childData["content"]+"<br>"+childData["starCount"];                // Insert text
+      // document.getElementById("postContainer").appendChild(eachpost);
+      // document.getElementById("postContainer").appendChild(document.createElement("br"));
+      // document.getElementById("postContainer").appendChild(document.createElement("br"));
+
+      // ...
+      // childSnapshot.forEach(function (childofchild){
+
+      // })
+      postContainer.innerHTML+="<eachpost>"+childData["content"]+" &nbsp;&nbsp; Stars = "+childData["starCount"]+"</eachpost><br><br>";
+
+    });
+  });
 }
