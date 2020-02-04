@@ -197,14 +197,12 @@ function disp(){
   });
 }
 function autoLogin() {
-  let usr = firebase.auth().currentUser;
-  console.log(usr);
-    if(usr)
-    {
-  console.log("bye");
 
-      login.style.display = "none";
-      home.style.display = "block";
-      dispname.innerHTML = usr.displayName;
-  }
+  firebase.auth().onAuthStateChanged(function (user) {
+    if(user!=null){
+    login.style.display = "none";
+    home.style.display = "block";
+    dispname.innerHTML = user.displayName;}
+  });
+ 
 }
