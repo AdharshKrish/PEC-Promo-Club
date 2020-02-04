@@ -215,10 +215,12 @@ function addpost(){
   //   console.log(snapshot.val());
   // });
   // postId="something";
+
   postId = database.ref('posts/').push().key;
   database.ref('posts/' + postId + '/content').set(newpost.value);
   database.ref('posts/' + postId + '/starCount').set(0);
   getPost();
+
 }
 
 function getPost(){
@@ -227,7 +229,7 @@ function getPost(){
   let ref=database.ref('posts/');
   ref.once('value', function (snapshot) {
     snapshot.forEach(function (childSnapshot) {
-      // var childKey = childSnapshot.key;
+      let postKey = childSnapshot.key;
       let childData = childSnapshot.val();
       // console.log(childData);
       // console.log(childData["content"]);
@@ -242,8 +244,19 @@ function getPost(){
       // childSnapshot.forEach(function (childofchild){
 
       // })
-      postContainer.innerHTML+="<eachpost>"+childData["content"]+" &nbsp;&nbsp; Stars = "+childData["starCount"]+"</eachpost><br><br>";
+      
+      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey + '")>&hearts;</button>'+ childData['starCount']+'<br><br>';
 
     });
+  });
+}
+
+function addLike(key){
+  let uid = firebase.auth().currentUser.uid;
+  let database = firebase.database();
+  database.ref('posts/'+key+'/starCount').once('value',function (count){
+    database.ref('posts/' + key + '/starCount').set(count.val()+1);
+    database.ref('posts/' + key + '/star/' + uid).set(0);
+    getPost();
   });
 }
