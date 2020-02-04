@@ -8,8 +8,8 @@ messagingSenderId: "771915701365",
 appId: "1:771915701365:web:a27c09fd55344ed18cec3c",
 measurementId: "G-MPL29PDR1K"
 };
-firebase.initializeApp(firebaseConfig);
-firebase.analytics();
+// firebase.initializeApp(firebaseConfig);
+// firebase.analytics();
 
 function toggleSignIn() {
   if (firebase.auth().currentUser) {
@@ -19,14 +19,14 @@ function toggleSignIn() {
   } else {
     var email = document.getElementById('email').value;
     var password = document.getElementById('password').value;
-    if (email.length < 4) {
-      alert('Please enter an email address.');
-      return;
-    }
-    if (password.length < 4) {
-      alert('Please enter a password.');
-      return;
-    }
+    // if (email.length < 4) {
+    //   alert('Please enter an email address.');
+    //   return;
+    // }
+    // if (password.length < 4) {
+    //   alert('Please enter a password.');
+    //   return;
+    // }
     // Sign in with email and pass.
     // [START authwithemail]
     firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
@@ -52,31 +52,43 @@ function toggleSignIn() {
  * Handles the sign up button press.
  */
 function handleSignUp() {
-  var email = document.getElementById('email').value;
-  var password = document.getElementById('password').value;
-  if (email.length < 4) {
-    alert('Please enter an email address.');
-    return;
-  }
-  if (password.length < 4) {
-    alert('Please enter a password.');
-    return;
-  }
-  // Create user with email and pass.
-  // [START createwithemail]
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
-    // Handle Errors here.
-    var errorCode = error.code;
+  var email = document.getElementById('upemail').value;
+  var password = document.getElementById('uppassword').value;
+  // if (email.length < 4) {
+  //   alert('Please enter an email address.');
+  //   return;
+  // }
+  // if (password.length < 4) {
+  //   alert('Please enter a password.');
+  //   return;
+  // }
+  // firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+  //   var errorCode = error.code;
+  //   var errorMessage = error.message;
+  //   if (errorCode == 'auth/weak-password') {
+  //     alert('The password is too weak.');
+  //   } else {
+  //     alert(errorMessage);
+  //   }
+  //   console.log(error);
+  // });
+
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(function (result) {
+      return result.user.updateProfile({
+        displayName: document.getElementById("upname").value
+      })
+    }).catch(function (error) {
+      console.log(error);
+      // var errorCode = error.code;
     var errorMessage = error.message;
-    // [START_EXCLUDE]
     if (errorCode == 'auth/weak-password') {
       alert('The password is too weak.');
     } else {
       alert(errorMessage);
     }
-    console.log(error);
-    // [END_EXCLUDE]
-  });
+    // console.log(error);
+    });
   // [END createwithemail]
 }
 
@@ -123,7 +135,7 @@ function sendPasswordReset() {
  *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
  *    out, and that is where we update the UI.
  */
-initApp();
+// initApp();
 function initApp() {
   // Listening for auth state changes.
   // [START authstatelistener]
@@ -166,4 +178,33 @@ function initApp() {
   document.getElementById('quickstart-sign-up').addEventListener('click', handleSignUp, false);
   document.getElementById('quickstart-verify-email').addEventListener('click', sendEmailVerification, false);
   document.getElementById('quickstart-password-reset').addEventListener('click', sendPasswordReset, false);
+}
+
+
+function disp(){
+
+  var name, email, photoUrl, uid, emailVerified;
+
+  firebase.auth().onAuthStateChanged(function (user){
+    name = user.displayName;
+    email = user.email;
+    photoUrl = user.photoURL;
+    emailVerified = user.emailVerified;
+    uid = user.uid;  // The user's ID, unique to the Firebase project. Do NOT use
+    // this value to authenticate with your backend server, if
+    // you have one. Use User.getToken() instead.
+    console.log(name+email+photoUrl+emailVerified+uid);
+  });
+}
+function autoLogin() {
+  let usr = firebase.auth().currentUser;
+  console.log(usr);
+    if(usr)
+    {
+  console.log("bye");
+
+      login.style.display = "none";
+      home.style.display = "block";
+      dispname.innerHTML = usr.displayName;
+  }
 }
