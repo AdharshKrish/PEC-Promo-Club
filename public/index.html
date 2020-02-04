@@ -84,6 +84,7 @@ function signIn(){
   home.style.display="block";
   let usr = firebase.auth().currentUser;
   dispname.innerHTML=usr.displayName;
+  UID = firebase.auth().currentUser.uid;
   getPost();
 
   // disp();

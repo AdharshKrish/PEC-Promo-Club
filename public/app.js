@@ -10,7 +10,7 @@ measurementId: "G-MPL29PDR1K"
 };
 // firebase.initializeApp(firebaseConfig);
 // firebase.analytics();
-
+let UID;
 function toggleSignIn() {
   if (firebase.auth().currentUser) {
     // [START signout]
@@ -202,7 +202,9 @@ function autoLogin() {
     if(user!=null){
     login.style.display = "none";
     home.style.display = "block";
-    dispname.innerHTML = user.displayName;}
+    dispname.innerHTML = user.displayName;
+    UID = firebase.auth().currentUser.uid;
+  }
     getPost();
   });
  
@@ -219,6 +221,7 @@ function addpost(){
   postId = database.ref('posts/').push().key;
   database.ref('posts/' + postId + '/content').set(newpost.value);
   database.ref('posts/' + postId + '/starCount').set(0);
+  database.ref('posts/' + postId + '/star').set(0);
   getPost();
 
 }
@@ -229,8 +232,28 @@ function getPost(){
   let ref=database.ref('posts/');
   ref.once('value', function (snapshot) {
     snapshot.forEach(function (childSnapshot) {
+      let symbol = "-";
+      let code=0;
       let postKey = childSnapshot.key;
       let childData = childSnapshot.val();
+      let like = JSON.stringify(childData);
+
+      // console.log(childSnapshot);
+      // console.log(childData['star']);
+      // console.log(JSON.stringify(childData['star']));
+
+        if(like.includes(UID)){
+          // symbol = "&#x1F497";
+          // symbol="&#x2764;";
+          symbol="&#x1f44d;";
+          code=1;
+          // console.log("likeee");
+        }
+      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey +'",'+code+ ')>'+symbol+'</button>'+ childData['starCount']+'<br><br>';
+
+    });
+  });
+}
       // console.log(childData);
       // console.log(childData["content"]);
 
@@ -244,19 +267,20 @@ function getPost(){
       // childSnapshot.forEach(function (childofchild){
 
       // })
-      
-      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey + '")>&hearts;</button>'+ childData['starCount']+'<br><br>';
 
-    });
-  });
-}
-
-function addLike(key){
-  let uid = firebase.auth().currentUser.uid;
+function addLike(key,c){
   let database = firebase.database();
+  if(c==0){
   database.ref('posts/'+key+'/starCount').once('value',function (count){
     database.ref('posts/' + key + '/starCount').set(count.val()+1);
-    database.ref('posts/' + key + '/star/' + uid).set(0);
-    getPost();
+    database.ref('posts/' + key + '/star/' + UID).set(0);
   });
+  }
+  else{
+    database.ref('posts/'+key+'/starCount').once('value',function (count){
+      database.ref('posts/' + key + '/starCount').set(count.val()-1);
+      database.ref('posts/' + key + '/star/' + UID).set(null);
+    });
+  }
+  getPost();
 }
