@@ -123,6 +123,7 @@ function sendPasswordReset() {
  *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
  *    out, and that is where we update the UI.
  */
+initApp();
 function initApp() {
   // Listening for auth state changes.
   // [START authstatelistener]
