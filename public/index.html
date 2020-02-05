@@ -15,11 +15,6 @@
     <script defer src="/__/firebase/7.7.0/firebase-storage.js"></script>
     <script defer src="/__/firebase/init.js"></script>
     <script defer src="app.js"></script>
-
-    <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.orange-indigo.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
-
   </head>
 <style>
   #postContainer{
@@ -32,88 +27,28 @@
   }
 </style>
 <body onload="autoLogin()">
-
-<page id="login">
-  <signin>
-    <input type="text" id="inemail" placeholder="Email">
-    <input type="password" id="inpass" placeholder="Password">
-    <button id="signin" onclick="signIn()">Sign-in</button>
+  <page id="login">
+    <signin>
+      <input type="text" id="inemail" placeholder="Email">
+      <input type="password" id="inpass" placeholder="Password">
+      <button id="signin" onclick="signIn()">Sign-in</button>
+      <br>
+      <button style="background:none;border:none" onclick="passReset()">Forgot password?</button style="background:none;border:none">
+    </signin>
     <br>
-    <button style="background:none;border:none" onclick="passReset()">Forgot password?</button style="background:none;border:none">
-  </signin>
-  <br>
-  <signup>
-    <input type="text" id="upname" placeholder="Name">
-    <input type="text" id="upemail" placeholder="Email">
-    <input type="password" id="uppassword" placeholder="Password">
-    <button id="signup" onclick="handleSignUp()">Sign-up</button>
-  </signup>
-</page>
-<page id="home" style="display:none">
-  <name id="dispname"></name>
-  <input type="textarea" id="newpost">
-  <button onclick="addpost()">Add Post</button>
-  <button style="float:right" onclick="signOut()">Sign out</button>
-  <div id="postContainer"></div>
-</page>
-<script>
-function signIn(){
-    var email = inemail.value;
-    var password = inpass.value;
-    if (email.length < 4 || !email.match("@")) {
-      alert('Please enter an email address');
-      return;
-    }
-    if (password.length < 4) {
-      alert('Please enter a password');
-      return;
-    }
-    firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      if (errorCode === 'auth/wrong-password') {
-        alert('Wrong password.');
-      } else {
-        alert(errorMessage);
-      }
-      console.log(error);
-    });
-  // alert('Signed in');
-  // window.location.href="home.html";
-  login.style.display="none";
-  home.style.display="block";
-  let usr = firebase.auth().currentUser;
-  dispname.innerHTML=usr.displayName;
-  UID = firebase.auth().currentUser.uid;
-  getPost();
-
-  // disp();
-}
-function signOut() {
-  if (firebase.auth().currentUser) {
-    firebase.auth().signOut();
-    // alert('Signed out');  
-      login.style.display = "block";
-    home.style.display = "none";
-  }
-}
-function passReset(){
-  var email = inemail.value;
-    alert('Please wait');
-  firebase.auth().sendPasswordResetEmail(email).then(function () {
-    alert('Password Reset Email Sent!');
-  }).catch(function (error) {
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    if (errorCode == 'auth/invalid-email') {
-      alert(errorMessage);
-    } else if (errorCode == 'auth/user-not-found') {
-      alert(errorMessage);
-    }
-    console.log(error);
-  });
-}
-
-</script>
+    <signup>
+      <input type="text" id="upname" placeholder="Name">
+      <input type="text" id="upemail" placeholder="Email">
+      <input type="password" id="uppassword" placeholder="Password">
+      <button id="signup" onclick="handleSignUp()">Sign-up</button>
+    </signup>
+  </page>
+  <page id="home" style="display:none">
+    <name id="dispname"></name>
+    <input type="textarea" id="newpost">
+    <button onclick="addpost()">Add Post</button>
+    <button style="float:right" onclick="signOut()">Sign out</button>
+    <div id="postContainer"></div>
+  </page>
 </body>
 </html>
