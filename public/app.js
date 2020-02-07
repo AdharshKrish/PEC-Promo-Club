@@ -41,7 +41,7 @@ function signIn(){
           // let usr = firebase.auth().currentUser;
           dispname.innerHTML=user.displayName;
           UID = user.uid;
-          console.log(UID);
+          // console.log(UID);
       }
       else{
         signOut();
@@ -78,12 +78,15 @@ function handleSignUp() {
       alert(errorMessage);
     }
     });
-    // signOut();
-    // alert("hi");
     firebase.auth().onAuthStateChanged(function (user){
       if(user){
+        firebase.database().ref('users/'+user.uid+'/name').set(user.displayName);
+        //   database.ref('posts/' + key + '/starCount').set(count.val()+1);
+        //   database.ref('posts/' + key + '/star/' + UID).set(0);
+        // });
         signOut();
-        alert("Account created and verification email sent! Please verify your email then sign in");
+        sendEmailVerification();
+        alert("Account created and verification email will be sent shortly. Please verify your email then sign in");
       }});  
 }
 
@@ -125,9 +128,7 @@ function disp(){
     email = user.email;
     photoUrl = user.photoURL;
     emailVerified = user.emailVerified;
-    uid = user.uid;  // The user's ID, unique to the Firebase project. Do NOT use
-    // this value to authenticate with your backend server, if
-    // you have one. Use User.getToken() instead.
+    uid = user.uid;
     console.log(name+email+photoUrl+emailVerified+uid);
   });
 }
@@ -139,46 +140,58 @@ function autoLogin() {
     home.style.display = "block";
     dispname.innerHTML = user.displayName;
     UID = firebase.auth().currentUser.uid;
-  }
+    getImg('profile-img/'+UID+'.jpg','profile-img');
     getPost();
+  }
+    // viewLikes("-M-FK6A6-75N0CmUcv59");
+
   });
 }
 
 function addpost(){
-  let database = firebase.database();
-  // postId="vcajbsjq";
-  // database.ref('posts/' + postId + '/starCount').once('value').then(function (snapshot) {
-  //   console.log(snapshot.val());
-  // });
-  // postId="something";
-
-  postId = database.ref('posts/').push().key;
-  database.ref('posts/' + postId + '/content').set(newpost.value);
-  database.ref('posts/' + postId + '/starCount').set(0);
-  database.ref('posts/' + postId + '/star').set(0);
-  getPost();
+  if(newpost.value!=""){
+    let database = firebase.database();
+    postId = database.ref('posts/').push().key;
+    database.ref('posts/' + postId + '/content').set(newpost.value);
+    database.ref('posts/' + postId + '/starCount').set(0);
+    database.ref('posts/' + postId + '/star').set(0);
+    database.ref('posts/' + postId + '/owner/id').set(UID);
+    database.ref('posts/' + postId + '/owner/name').set(firebase.auth().currentUser.displayName);
+    getPost();
+  }
+  else{
+    alert("enter some content");
+  }
 
 }
 
 function getPost(){
   postContainer.innerHTML="";
-  let database = firebase.database();
-  let ref=database.ref('posts/');
-  ref.once('value', function (snapshot) {
-    snapshot.forEach(function (childSnapshot) {
+  const ref=firebase.database().ref('posts/');
+  ref.once('value', function (allposts) {
+    allposts.forEach(function (eachpost) {
       let symbol = "-";
       let code=0;
-      let postKey = childSnapshot.key;
-      let childData = childSnapshot.val();
-      let like = JSON.stringify(childData);
-
-        if(like.includes(UID)){
+      const postKey = eachpost.key;
+      const childData = eachpost.val();
+      let owner=childData.owner;
+      let hidn="hidden";
+      if(typeof(owner)!='undefined')
+      {
+        owner=childData.owner.name;
+        if(childData.owner.id==UID){
+          hidn="";
+        }
+      }
+      const like = JSON.stringify(childData);
+      const likes=like.replace('"id":"'+UID+'",','');
+        if(likes.includes(UID)){
           // symbol = "&#x1F497";
           // symbol="&#x2764;";
           symbol="&#x1f44d;";
           code=1;
         }
-      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey +'",'+code+ ')>'+symbol+'</button>'+ childData['starCount']+'<br><br>';
+      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey +'",'+code+ ')>'+symbol+'</button>'+ childData['starCount']+'&nbsp;<button class="linky" onclick=viewLikes("'+postKey+'")>view likes</button>&nbsp;&nbsp;by '+owner+'&nbsp;<input class="linky" value="delete" onclick=deletePost("'+postKey+'") '+hidn+'><br><br>';
 
     });
   });
@@ -198,5 +211,67 @@ function addLike(key,c){
       database.ref('posts/' + key + '/star/' + UID).set(null);
     });
   }
+  getPost();
+}
+
+function getImg(loc,elt){
+
+  var storage = firebase.storage();
+  var gsReference = storage.refFromURL('gs://pec-promoclub.appspot.com/'+loc);
+
+  gsReference.getDownloadURL().then(function(url) {
+
+    // var xhr = new XMLHttpRequest();
+    // xhr.responseType = 'blob';
+    // xhr.onload = function(event) {
+    //   var blob = xhr.response;
+    // };
+    // xhr.open('GET', url);
+    // xhr.send();
+
+    var img = document.getElementById(elt);
+    img.src = url;
+  }).catch(function(error) {
+    // A full list of error codes is available at
+    // https://firebase.google.com/docs/storage/web/handle-errors
+    switch (error.code) {
+      case 'storage/object-not-found':
+        // elt.alt="no image uploaded";
+        break;
+
+      case 'storage/unauthorized':
+        // User doesn't have permission to access the object
+        break;
+
+      case 'storage/canceled':
+        // User canceled the upload
+        break;
+
+      case 'storage/unknown':
+        // Unknown error occurred, inspect the server response
+        break;
+    }
+  });
+}
+
+function viewLikes(postID){
+  temp.innerHTML="";
+  let ref=firebase.database().ref('posts/'+postID+'/star/');
+  ref.once('value', (likes)=>{
+    if(likes.val()==null){
+      temp.innerHTML="no likes yet";
+    }
+    likes.forEach((eachlike)=>{
+      let userId = eachlike.key;
+      firebase.database().ref('users/'+userId+'/name/').once('value',(name)=>{
+        // console.log(name.val());
+        temp.innerHTML+=name.val()+'<br>';
+      });
+    });
+  });
+}
+
+function deletePost(postID){
+  firebase.database().ref('posts/'+postID).set(null);
   getPost();
 }

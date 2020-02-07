@@ -20,10 +20,19 @@
   #postContainer{
     border:2px solid #000;
     padding: 10px;
-    margin:50px 100px;
+    margin:50px 10vw;
   }
   #postContainer eachpost{
     border:2px solid #f00;
+  }
+  .linky{
+    background: none;
+    border: none;
+    text-decoration: underline;
+    color: blue;
+  }
+  .linky:focus{
+    outline: none;
   }
 </style>
 <body onload="autoLogin()">
@@ -45,10 +54,12 @@
   </page>
   <page id="home" style="display:none">
     <name id="dispname"></name>
+    <img style="height: 50px;width: 50px;" alt="no-profile-img" id="profile-img">
     <input type="textarea" id="newpost">
     <button onclick="addpost()">Add Post</button>
     <button style="float:right" onclick="signOut()">Sign out</button>
     <div id="postContainer"></div>
+    <div id="temp"></div>
   </page>
 </body>
 </html>
