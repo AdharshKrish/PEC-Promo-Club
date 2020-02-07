@@ -20,7 +20,7 @@
   #postContainer{
     border:2px solid #000;
     padding: 10px;
-    margin:50px 10vw;
+    margin:50px 5vw;
   }
   #postContainer eachpost{
     border:2px solid #f00;
@@ -54,10 +54,12 @@
   </page>
   <page id="home" style="display:none">
     <name id="dispname"></name>
-    <img style="height: 50px;width: 50px;" alt="no-profile-img" id="profile-img">
+    <img style="height: 50px;width: 50px;" id="profimg">
     <input type="textarea" id="newpost">
     <button onclick="addpost()">Add Post</button>
+    <input type="file" name="profile" accept="image/*" id="upimg" onchange="uploadImg('upimg')">
     <button style="float:right" onclick="signOut()">Sign out</button>
+    <!-- <button style="float:right" onclick="signOut()">Delete Account</button> -->
     <div id="postContainer"></div>
     <div id="temp"></div>
   </page>

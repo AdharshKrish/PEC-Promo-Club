@@ -80,12 +80,10 @@ function handleSignUp() {
     });
     firebase.auth().onAuthStateChanged(function (user){
       if(user){
-        firebase.database().ref('users/'+user.uid+'/name').set(user.displayName);
-        //   database.ref('posts/' + key + '/starCount').set(count.val()+1);
-        //   database.ref('posts/' + key + '/star/' + UID).set(0);
-        // });
-        signOut();
+        let id=user.uid,name=user.displayName;
+        firebase.database().ref('users/'+id+'/name').set(name);
         sendEmailVerification();
+        signOut();
         alert("Account created and verification email will be sent shortly. Please verify your email then sign in");
       }});  
 }
@@ -140,11 +138,9 @@ function autoLogin() {
     home.style.display = "block";
     dispname.innerHTML = user.displayName;
     UID = firebase.auth().currentUser.uid;
-    getImg('profile-img/'+UID+'.jpg','profile-img');
+    getImg('profile-img/'+UID+'.jpg','profimg');
     getPost();
   }
-    // viewLikes("-M-FK6A6-75N0CmUcv59");
-
   });
 }
 
@@ -174,14 +170,10 @@ function getPost(){
       let code=0;
       const postKey = eachpost.key;
       const childData = eachpost.val();
-      let owner=childData.owner;
       let hidn="hidden";
-      if(typeof(owner)!='undefined')
-      {
-        owner=childData.owner.name;
-        if(childData.owner.id==UID){
-          hidn="";
-        }
+      let owner=childData.owner.name;
+      if(childData.owner.id==UID){
+        hidn="";
       }
       const like = JSON.stringify(childData);
       const likes=like.replace('"id":"'+UID+'",','');
@@ -215,7 +207,7 @@ function addLike(key,c){
 }
 
 function getImg(loc,elt){
-
+  var img = document.getElementById(elt);
   var storage = firebase.storage();
   var gsReference = storage.refFromURL('gs://pec-promoclub.appspot.com/'+loc);
 
@@ -229,14 +221,14 @@ function getImg(loc,elt){
     // xhr.open('GET', url);
     // xhr.send();
 
-    var img = document.getElementById(elt);
     img.src = url;
+    // img.onerror = "this.alt='hi'";
   }).catch(function(error) {
     // A full list of error codes is available at
     // https://firebase.google.com/docs/storage/web/handle-errors
     switch (error.code) {
       case 'storage/object-not-found':
-        // elt.alt="no image uploaded";
+        img.style.display="none";
         break;
 
       case 'storage/unauthorized':
@@ -251,6 +243,39 @@ function getImg(loc,elt){
         // Unknown error occurred, inspect the server response
         break;
     }
+  });
+}
+
+function uploadImg(elt){
+  let file = document.getElementById(elt).files[0];
+  var storageRef = firebase.storage().ref();
+  var uploadTask = storageRef.child('profile-img/'+UID+'.jpg').put(file);
+  // Register three observers:
+  // 1. 'state_changed' observer, called any time the state changes
+  // 2. Error observer, called on failure
+  // 3. Completion observer, called on successful completion
+  uploadTask.on('state_changed', function(snapshot){
+    // Observe state change events such as progress, pause, and resume
+    // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    console.log('Upload is ' + progress + '% done');
+    switch (snapshot.state) {
+      case firebase.storage.TaskState.PAUSED: // or 'paused'
+        console.log('Upload is paused');
+        break;
+      case firebase.storage.TaskState.RUNNING: // or 'running'
+        console.log('Upload is running');
+        break;
+    }
+  }, function(error) {
+    // Handle unsuccessful uploads
+  }, function() {
+    // Handle successful uploads on complete
+    // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+    uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+      console.log('File available at', downloadURL);
+      location.reload();
+    });
   });
 }
 
