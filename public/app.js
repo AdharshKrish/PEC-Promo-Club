@@ -10,6 +10,7 @@ measurementId: "G-MPL29PDR1K"
 };
 
 let UID;
+let flag;
 
 function signIn(){
   var email = inemail.value;
@@ -35,15 +36,15 @@ function signIn(){
   
   firebase.auth().onAuthStateChanged(function (user){
     if(user){
-      if(user.emailVerified){
-          login.style.display="none";
-          home.style.display="block";
-          // let usr = firebase.auth().currentUser;
-          dispname.innerHTML=user.displayName;
-          UID = user.uid;
-          // console.log(UID);
-      }
-      else{
+      // if(user.emailVerified){
+          // login.style.display="none";
+          // home.style.display="block";
+          // // let usr = firebase.auth().currentUser;
+          // dispname.innerHTML=user.displayName;
+          // UID = user.uid;
+          // // console.log(UID);
+      // }
+      if(!user.emailVerified){
         signOut();
         alert("Please verify your email and then continue");
         sendEmailVerification();
@@ -153,6 +154,19 @@ function addpost(){
     database.ref('posts/' + postId + '/star').set(0);
     database.ref('posts/' + postId + '/owner/id').set(UID);
     database.ref('posts/' + postId + '/owner/name').set(firebase.auth().currentUser.displayName);
+    let d = new Date();
+    let yr = d.getFullYear()*100000000;
+    let mo = (d.getMonth()+1)*1000000;
+    let dt = d.getUTCDate()*10000;
+    let hr = d.getHours()*100;
+    let mi = d.getMinutes();
+    let date = yr+mo+dt+hr+mi;
+    database.ref('posts/'+postId+'/date').set(date);
+    // database.ref('posts/' + postId + '/date/date').set(d.getDate());
+    // database.ref('posts/' + postId + '/date/month').set(d.getMonth()+1);
+    // database.ref('posts/' + postId + '/date/year').set(d.getFullYear());
+    // database.ref('posts/' + postId + '/date/hours').set(d.getHours());
+    // database.ref('posts/' + postId + '/date/minutes').set(d.getMinutes());
     getPost();
   }
   else{
@@ -163,7 +177,16 @@ function addpost(){
 
 function getPost(){
   postContainer.innerHTML="";
-  const ref=firebase.database().ref('posts/');
+// var topUserPostsRef = firebase.database().ref('user-posts/' + myUserId).orderByChild('starCount');
+  let d = new Date();
+  let yr = d.getFullYear()*100000000;
+  let mo = (d.getMonth()+1)*1000000;
+  let dt = d.getUTCDate()*10000;
+  let hr = d.getHours()*100;
+  let mi = d.getMinutes();
+  let lastweek = yr+mo+dt+hr+mi-7*10000;
+
+  const ref=firebase.database().ref('posts/').orderByChild('date').startAt(lastweek);
   ref.once('value', function (allposts) {
     allposts.forEach(function (eachpost) {
       let symbol = "-";
@@ -183,7 +206,18 @@ function getPost(){
           symbol="&#x1f44d;";
           code=1;
         }
-      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey +'",'+code+ ')>'+symbol+'</button>'+ childData['starCount']+'&nbsp;<button class="linky" onclick=viewLikes("'+postKey+'")>view likes</button>&nbsp;&nbsp;by '+owner+'&nbsp;<input class="linky" value="delete" onclick=deletePost("'+postKey+'") '+hidn+'><br><br>';
+        let date=childData.date;
+
+    if(typeof(childData.date)!="undefined")
+        date=childData.date.toString().substring(6,8)+'/'+childData.date.toString().substring(4,6)+'/'+childData.date.toString().substring(0,4)+' '+childData.date.toString().substring(8,10)+':'+childData.date.toString().substring(10,12);
+      
+
+      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey +'",'+code+ ')>'+symbol+'</button>'
+      + childData['starCount']+'&nbsp;<button class="linky" onclick=viewLikes("'+postKey+'")>view likes</button>&nbsp;&nbsp;by '
+      +owner+'&nbsp;<img style="height: 25px;width: 25px;" alt="'+childData.owner.id+'" id="'+postKey+'">&nbsp;on: '+date+'&nbsp; <input class="linky" value="delete" onclick=deletePost("'+postKey+'") '+hidn+'><br><br>';
+      getImg('profile-img/'+childData.owner.id+'.jpg',postKey);
+      
+      console.log(childData.owner.id+' '+postKey);
 
     });
   });
@@ -222,6 +256,7 @@ function getImg(loc,elt){
     // xhr.send();
 
     img.src = url;
+    console.log(url);
     // img.onerror = "this.alt='hi'";
   }).catch(function(error) {
     // A full list of error codes is available at
