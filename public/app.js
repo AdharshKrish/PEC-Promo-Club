@@ -86,6 +86,7 @@ function handleSignUp() {
       if(user){
         let id=user.uid,name=user.displayName;
         firebase.database().ref('users/'+id+'/name').set(name);
+        firebase.database().ref('users/' + id + '/email').set(user.email);
         sendEmailVerification();
         signOut();
         alert("Account created and verification email will be sent shortly. Please verify your email then sign in");
@@ -131,7 +132,6 @@ function disp(){
     photoUrl = user.photoURL;
     emailVerified = user.emailVerified;
     uid = user.uid;
-    console.log(name+email+photoUrl+emailVerified+uid);
   });
 }
 function autoLogin() {
@@ -145,9 +145,9 @@ function autoLogin() {
     document.getElementById('dispname').addEventListener('click', () => {
       getProfile(UID);
     });
-
+    getProfile(UID);
     getImg('profile-img/'+UID+'.jpg','profimg');
-      getImg('profile-img/' + UID + '.jpg', 'expprofimg');
+    getImg('profile-img/' + UID + '.jpg', 'expprofimg');
     getPost();
   }
   });
@@ -264,33 +264,82 @@ function addLike(key,c){
 }
 
 function getProfile(ownerid) {
-   var ownername;
+   var ownername, bio, phone,bday;
   const ref = firebase.database().ref('users/'+ownerid);
   ref.once('value',function(arg){
     // console.log(arg.val()['name'])
+
     ownername = arg.val()['name'];
+    bio = (arg.val()['bio'] == undefined) ? "":arg.val()['bio'];
+    phone = (arg.val()['phone'] == undefined) ? "" : arg.val()['phone'];
+    bday = (arg.val()['bday'] == undefined) ? "" : arg.val()['bday'];
     console.log(ownername);
-    var profcard = `
+    var profcard;
+    if(ownerid == UID){
+       profcard = `
+          <img id="expprofimg"><button class="likecount" onclick="upimg.click()" style="margin:0 auto">Change Profile Image</button>
+          <div class="card-body">
+            <h5 class="card-title">${ownername}</h5>
+            <div class="input-group mb-3">
+              <input id="bioinput" type="text" value="${bio}"  class="form-control" placeholder="Bio" aria-label="Recipient's username" aria-describedby="basic-addon2" disabled>
+              <div class="input-group-append">
+                <span  onclick="edit('${ownerid}','bio')" class="input-group-text" id="biobtn"><img src="img/create-24px.svg"></span>
+              </div>
+            </div>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><div class="input-group mb-3">
+              <input id="phoneinput" type="text"  value="${phone}" class="form-control" placeholder="Phone" aria-label="Recipient's username" aria-describedby="basic-addon2" disabled>
+              <div class="input-group-append">
+                <span  onclick="edit('${ownerid}','phone')" class="input-group-text" id="phonebtn"><img src="img/create-24px.svg"></span>
+              </div>
+            </div></li>
+            <li class="list-group-item"><div class="input-group mb-3">
+              <input id="bdayinput" type="date" value="${bday}" class="form-control" placeholder="Bday" aria-label="Recipient's username" aria-describedby="basic-addon2" disabled>
+              <div class="input-group-append">
+                <span  onclick="edit('${ownerid}','bday')" class="input-group-text" id="bdaybtn"><img src="img/create-24px.svg"></span>
+              </div>
+            </div></li>
+          </ul>
+          `;
+    }else{
+     profcard = `
           <img id="expprofimg">
           <div class="card-body">
             <h5 class="card-title">${ownername}</h5>
-            <p class="card-text">Some and make up the bulk of the card's content.
+            <p class="card-text">${bio}
             </p>
           </div>
           <ul class="list-group list-group-flush">
-            <li class="list-group-item">Cras justo odio</li>
-            <li class="list-group-item">Dapibus ac facilisis in</li>
             <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">${phone}</li>
+            <li class="list-group-item">${bday}</li>
           </ul>
-          <div class="card-body">
-            <a href="#" class="card-link">Card link</a>
-            <a href="#" class="card-link">Another link</a>
-          </div>`;
+          `;
+    }
     window.profcard.innerHTML = profcard;
     getImg('profile-img/' + ownerid + '.jpg', 'expprofimg');
 
   })
   
+  
+}
+
+function edit(ownerid,eltid) {
+let elt = document.getElementById(eltid+'input');
+if(elt.disabled){
+  document.getElementById(eltid+'btn').innerHTML = '<img src="img/save.svg">';
+  elt.disabled = false;
+}else{
+  document.getElementById(eltid+'btn').innerHTML = '<img src="img/create-24px.svg">';
+  elt.disabled = true;
+  let database = firebase.database();
+  // postId = database.ref('users/'+ownerid).push().key;
+  database.ref('users/' + ownerid + '/' + eltid).set(elt.value);
+}
+
+  
+
   
 }
 

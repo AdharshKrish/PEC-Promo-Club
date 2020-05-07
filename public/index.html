@@ -55,7 +55,7 @@
     </signup>
   </page>
   <page id="home" style="display:none">
-      <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #808;">
+      <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #808;margin-bottom: 30px;position: -webkit-sticky;position: sticky;top:0;z-index:10">
       <img  id="profimg">
         <span class="navbar-brand" id="dispname"></span>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
@@ -83,10 +83,10 @@
     <div class="container-fluid">
    <nav>
       <!-- <name id="dispname"></name> -->
-      <img style="height: 50px;width: 50px;" id="profimg">
+      <!-- <img style="height: 50px;width: 50px;" id="profimg"> -->
       <!-- <input type="textarea" id="newpost">
           <button onclick="addpost()">Add Post</button> -->
-      <input type="file" name="profile" accept="image/*" id="upimg" onchange="uploadImg('upimg')">
+      <input type="file" name="profile" accept="image/*"  id="upimg" onchange="uploadImg('upimg')" hidden>
       <!-- <button style="float:right" onclick="signOut()">Sign out</button> -->
    </nav>
 
@@ -103,7 +103,7 @@
     <div class="col-sm-6">
       <div id="postContainer"></div>
     </div>
-      <div class="col-sm-3">
+      <div class="col-sm-3" style="position: fixed;right: 0">
         <div class="card" id="profcard" style="width: 100%;">
           <img id="expprofimg">
           <div class="card-body">
