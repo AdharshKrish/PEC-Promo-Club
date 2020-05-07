@@ -39,20 +39,80 @@
 </style>
 <body onload="autoLogin()">
   <page id="login">
-    <signin>
+    <h1 style="text-align: center;margin-top:40px;color: #808;font-family: Poppins;">PEC&ensp;Promo&ensp;Club</h1>
+    <div class="signinbox" >
+      <div class="signtab row">
+        <div class="col-6" id='intab'>Sign-in</div>
+        <div class="col-6" id='uptab'>Sign-up</div>
+      </div>
+      <signin>
+      <div class="form__group field">
+        <input type="input" class="form__field" placeholder="Email" name="email" id='inemail' required />
+        <label for="inemail" class="form__label">Email</label>
+        
+      </div>
+      <div class="form__group field">
+        <input type="password" class="form__field" placeholder="Password" name="password" id='inpass' required />
+        <label for="inpass" class="form__label">Password</label>
+      </div>
+      <button  class="likecount" onclick="passReset()">Forgot password?</button>
+
+      <button id="signin" class="loginbtn" onclick="signIn()">Sign-in</button></signin>
+
+      <signup>
+        <div class="form__group field">
+          <input type="input" class="form__field" placeholder="Email" name="email" id='upname' required />
+          <label for="upname" class="form__label">Username</label>
+        
+        </div>
+        <div class="form__group field">
+          <input type="input" class="form__field" placeholder="Email" name="email" id='upemail' required />
+          <label for="upemail" class="form__label">Email</label>
+      
+        </div>
+        <div class="form__group field">
+          <input type="password" class="form__field" placeholder="Password" name="password" id='uppassword' required />
+          <label for="uppassword" class="form__label">Password</label>
+        </div>
+      
+        <button id="signup" class="loginbtn" onclick="handleSignUp()">Sign-up</button>
+      </signup>
+
+    <script>
+      document.querySelector('signup').style.display = "none";
+      uptab.style.boxShadow = "inset 10px -10px 20px #aaaa";
+      intab.addEventListener('click',() => {
+        uptab.style.boxShadow = "inset 10px -10px 20px #aaaa";
+        intab.style.boxShadow = "none";
+          document.querySelector('signin').style.display = "block";
+          document.querySelector('signup').style.display = "none";
+
+
+
+      });
+      uptab.addEventListener('click', () => {
+        uptab.style.boxShadow = "none";
+          intab.style.boxShadow = "inset -10px -10px 20px #aaaa";
+          document.querySelector('signin').style.display = "none";
+          document.querySelector('signup').style.display = "block";
+
+        });
+    </script>
+    </div>
+    <!-- <signin>
       <input type="text" id="inemail" placeholder="Email">
       <input type="password" id="inpass" placeholder="Password">
       <button id="signin" onclick="signIn()">Sign-in</button>
       <br>
       <button style="background:none;border:none" onclick="passReset()">Forgot password?</button style="background:none;border:none">
-    </signin>
-    <br>
+    </signin> -->
+    <!-- <br>
     <signup>
       <input type="text" id="upname" placeholder="Name">
       <input type="text" id="upemail" placeholder="Email">
       <input type="password" id="uppassword" placeholder="Password">
       <button id="signup" onclick="handleSignUp()">Sign-up</button>
-    </signup>
+    </signup> -->
   </page>
   <page id="home" style="display:none">
       <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #808;margin-bottom: 30px;position: -webkit-sticky;position: sticky;top:0;z-index:10">
