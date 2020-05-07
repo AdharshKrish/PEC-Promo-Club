@@ -43,6 +43,11 @@
       text-decoration: underline;
       
   }
+  .likecount:focus{
+      outline:none;
+      box-shadow: none;
+      border: none;
+  }
   .lkbtn{
        border:none;
       background: none !important;

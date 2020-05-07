@@ -236,7 +236,7 @@ function getPost(){
           <h6 class="card-subtitle mb-2 text-muted">${date}</h6>
           <p class="card-text">${childData['content']}</p>
           <button class="lkbtn" onclick=addLike("${postKey}",${code})>${likeimg}</button>
-          <button class="likecount" onclick=viewLikes("${postKey}")>${childData['starCount']}</button>
+          <button class="likecount" data-toggle="modal" data-target="#exampleModalCenter" onclick=viewLikes("${postKey}")>${childData['starCount']}</button>
         </div>
       </div>`;
       
@@ -270,6 +270,7 @@ function getProfile(ownerid) {
     // console.log(arg.val()['name'])
 
     ownername = arg.val()['name'];
+    mail = arg.val()['email'];
     bio = (arg.val()['bio'] == undefined) ? "":arg.val()['bio'];
     phone = (arg.val()['phone'] == undefined) ? "" : arg.val()['phone'];
     bday = (arg.val()['bday'] == undefined) ? "" : arg.val()['bday'];
@@ -288,6 +289,8 @@ function getProfile(ownerid) {
             </div>
           </div>
           <ul class="list-group list-group-flush">
+          <li class="list-group-item">${mail}</li>
+
             <li class="list-group-item"><div class="input-group mb-3">
               <input id="phoneinput" type="text"  value="${phone}" class="form-control" placeholder="Phone" aria-label="Recipient's username" aria-describedby="basic-addon2" disabled>
               <div class="input-group-append">
@@ -300,6 +303,7 @@ function getProfile(ownerid) {
                 <span  onclick="edit('${ownerid}','bday')" class="input-group-text" id="bdaybtn"><img src="img/create-24px.svg"></span>
               </div>
             </div></li>
+            
           </ul>
           `;
     }else{
@@ -311,7 +315,7 @@ function getProfile(ownerid) {
             </p>
           </div>
           <ul class="list-group list-group-flush">
-            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">${mail}</li>
             <li class="list-group-item">${phone}</li>
             <li class="list-group-item">${bday}</li>
           </ul>
@@ -418,20 +422,23 @@ function uploadImg(elt){
 }
 
 function viewLikes(postID){
-  temp.innerHTML="";
+  likesmodal.innerHTML='';
   let ref=firebase.database().ref('posts/'+postID+'/star/');
   ref.once('value', (likes)=>{
-    if(likes.val()==null){
-      temp.innerHTML="no likes yet";
+    if(likes.val()==0){
+      likesmodal.innerHTML="no likes yet";
     }
-    likes.forEach((eachlike)=>{
-      let userId = eachlike.key;
-      firebase.database().ref('users/'+userId+'/name/').once('value',(name)=>{
-        // console.log(name.val());
-        temp.innerHTML+=name.val()+'<br>';
+    else{
+      likes.forEach((eachlike)=>{
+        let userId = eachlike.key;
+        firebase.database().ref('users/'+userId+'/name/').once('value',(name)=>{
+          likesmodal.innerHTML+=name.val()+'<br>';
+        });
       });
-    });
+    }
   });
+
+
 }
 
 function deletePost(postID){
