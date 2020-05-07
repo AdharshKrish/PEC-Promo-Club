@@ -12,6 +12,9 @@ measurementId: "G-MPL29PDR1K"
 let UID;
 let flag;
 
+
+
+
 function signIn(){
   var email = inemail.value;
   var password = inpass.value;
@@ -139,7 +142,12 @@ function autoLogin() {
     home.style.display = "block";
     dispname.innerHTML = user.displayName;
     UID = firebase.auth().currentUser.uid;
+    document.getElementById('dispname').addEventListener('click', () => {
+      getProfile(UID);
+    });
+
     getImg('profile-img/'+UID+'.jpg','profimg');
+      getImg('profile-img/' + UID + '.jpg', 'expprofimg');
     getPost();
   }
   });
@@ -167,6 +175,7 @@ function addpost(){
     // database.ref('posts/' + postId + '/date/year').set(d.getFullYear());
     // database.ref('posts/' + postId + '/date/hours').set(d.getHours());
     // database.ref('posts/' + postId + '/date/minutes').set(d.getMinutes());
+    newpost.value = "";
     getPost();
   }
   else{
@@ -189,7 +198,7 @@ function getPost(){
   const ref=firebase.database().ref('posts/').orderByChild('date').startAt(lastweek);
   ref.once('value', function (allposts) {
     allposts.forEach(function (eachpost) {
-      let symbol = "-";
+      let symbol = false;
       let code=0;
       const postKey = eachpost.key;
       const childData = eachpost.val();
@@ -203,19 +212,33 @@ function getPost(){
         if(likes.includes(UID)){
           // symbol = "&#x1F497";
           // symbol="&#x2764;";
-          symbol="&#x1f44d;";
+          symbol=true;
           code=1;
         }
         let date=childData.date;
 
     if(typeof(childData.date)!="undefined")
         date=childData.date.toString().substring(6,8)+'/'+childData.date.toString().substring(4,6)+'/'+childData.date.toString().substring(0,4)+' '+childData.date.toString().substring(8,10)+':'+childData.date.toString().substring(10,12);
-      
+      var likeimg;
 
-      postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey +'",'+code+ ')>'+symbol+'</button>'
-      + childData['starCount']+'&nbsp;<button class="linky" onclick=viewLikes("'+postKey+'")>view likes</button>&nbsp;&nbsp;by '
-      +owner+'&nbsp;<img style="height: 25px;width: 25px;" alt="'+childData.owner.id+'" id="'+postKey+'">&nbsp;on: '+date+'&nbsp; <input class="linky" value="delete" onclick=deletePost("'+postKey+'") '+hidn+'><br><br>';
-      getImg('profile-img/'+childData.owner.id+'.jpg',postKey);
+        if(symbol){
+          likeimg="<img src='img/liked.svg'/>";
+        }else{
+          likeimg = "<img src='img/unlike.svg'>";
+        }
+      // postContainer.innerHTML += '<eachpost>' + childData['content'] + '</eachpost><button onclick=addLike("' + postKey +'",'+code+ ')>'+symbol+'</button>'
+      // + childData['starCount']+'&nbsp;<button class="linky" onclick=viewLikes("'+postKey+'")>view likes</button>&nbsp;&nbsp;by '
+      // +owner+'&nbsp;&nbsp;on: '+date+'&nbsp; <input class="linky" value="delete" onclick=deletePost("'+postKey+'") '+hidn+'><br><br>';
+      //  getImg('profile-img/'+childData.owner.id+'.jpg',postKey);
+      postContainer.innerHTML += `<div class="card" style="width: 100%;">
+        <div class="card-body">
+          <h5 class="card-title" onclick=getProfile('${childData.owner.id}')>${owner}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">${date}</h6>
+          <p class="card-text">${childData['content']}</p>
+          <button class="lkbtn" onclick=addLike("${postKey}",${code})>${likeimg}</button>
+          <button class="likecount" onclick=viewLikes("${postKey}")>${childData['starCount']}</button>
+        </div>
+      </div>`;
       
       console.log(childData.owner.id+' '+postKey);
 
@@ -238,6 +261,37 @@ function addLike(key,c){
     });
   }
   getPost();
+}
+
+function getProfile(ownerid) {
+   var ownername;
+  const ref = firebase.database().ref('users/'+ownerid);
+  ref.once('value',function(arg){
+    // console.log(arg.val()['name'])
+    ownername = arg.val()['name'];
+    console.log(ownername);
+    var profcard = `
+          <img id="expprofimg">
+          <div class="card-body">
+            <h5 class="card-title">${ownername}</h5>
+            <p class="card-text">Some and make up the bulk of the card's content.
+            </p>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+          </ul>
+          <div class="card-body">
+            <a href="#" class="card-link">Card link</a>
+            <a href="#" class="card-link">Another link</a>
+          </div>`;
+    window.profcard.innerHTML = profcard;
+    getImg('profile-img/' + ownerid + '.jpg', 'expprofimg');
+
+  })
+  
+  
 }
 
 function getImg(loc,elt){
