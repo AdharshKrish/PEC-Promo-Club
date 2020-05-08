@@ -9,7 +9,7 @@ appId: "1:771915701365:web:a27c09fd55344ed18cec3c",
 measurementId: "G-MPL29PDR1K"
 };
 
-let UID;
+let UID,USER;
 let flag;
 
 
@@ -142,6 +142,7 @@ function autoLogin() {
     home.style.display = "block";
     dispname.innerHTML = user.displayName;
     UID = firebase.auth().currentUser.uid;
+    USER = firebase.auth().currentUser;
     document.getElementById('dispname').addEventListener('click', () => {
       getProfile(UID);
     });
@@ -197,6 +198,8 @@ function getPost(){
 
   const ref=firebase.database().ref('posts/').orderByChild('date').startAt(lastweek);
   ref.once('value', function (allposts) {
+    // allposts.reverse();
+    // console.log(allposts);
     allposts.forEach(function (eachpost) {
       let symbol = false;
       let code=0;
@@ -233,6 +236,7 @@ function getPost(){
       postContainer.innerHTML += `<div class="card" style="width: 100%;">
         <div class="card-body">
           <h5 class="card-title" onclick=getProfile('${childData.owner.id}')>${owner}</h5>
+          <img style="float:right" onclick=deletePost('${postKey}') src="img/delete_forever-24px.svg" ${hidn}>
           <h6 class="card-subtitle mb-2 text-muted">${date}</h6>
           <p class="card-text">${childData['content']}</p>
           <button class="lkbtn" onclick=addLike("${postKey}",${code})>${likeimg}</button>
@@ -269,7 +273,13 @@ function getProfile(ownerid) {
   ref.once('value',function(arg){
     // console.log(arg.val()['name'])
 
-    ownername = arg.val()['name'];
+    if(arg.val()['name'] == undefined){
+      firebase.database().ref('users/' + ownerid + '/name').set(USER.displayName);
+      ownername = arg.val()['name'];
+    }
+    else{
+      ownername = arg.val()['name'];
+    }
     mail = arg.val()['email'];
     bio = (arg.val()['bio'] == undefined) ? "":arg.val()['bio'];
     phone = (arg.val()['phone'] == undefined) ? "" : arg.val()['phone'];
