@@ -90,6 +90,7 @@ function handleSignUp() {
         sendEmailVerification();
         signOut();
         alert("Account created and verification email will be sent shortly. Please verify your email then sign in");
+        window.location.reload();
       }});  
 }
 
@@ -123,17 +124,17 @@ function sendEmailVerification() {
   });
 }
 
-function disp(){
-  var name, email, photoUrl, uid, emailVerified;
-  //firebase.auth().currentUser
-  firebase.auth().onAuthStateChanged(function (user){
-    name = user.displayName;
-    email = user.email;
-    photoUrl = user.photoURL;
-    emailVerified = user.emailVerified;
-    uid = user.uid;
-  });
-}
+// function disp(){
+//   var name, email, photoUrl, uid, emailVerified;
+//   //firebase.auth().currentUser
+//   firebase.auth().onAuthStateChanged(function (user){
+//     name = user.displayName;
+//     email = user.email;
+//     photoUrl = user.photoURL;
+//     emailVerified = user.emailVerified;
+//     uid = user.uid;
+//   });
+// }
 function autoLogin() {
 
   firebase.auth().onAuthStateChanged(function (user) {
@@ -162,7 +163,7 @@ function addpost(){
     database.ref('posts/' + postId + '/starCount').set(0);
     database.ref('posts/' + postId + '/star').set(0);
     database.ref('posts/' + postId + '/owner/id').set(UID);
-    database.ref('posts/' + postId + '/owner/name').set(firebase.auth().currentUser.displayName);
+    database.ref('posts/' + postId + '/owner/name').set(USER.displayName);
     let d = new Date();
     let yr = d.getFullYear()*100000000;
     let mo = (d.getMonth()+1)*1000000;
@@ -201,7 +202,7 @@ function getPost(){
     // allposts.reverse();
     // console.log(allposts);
     allposts.forEach(function (eachpost) {
-      let symbol = false;
+      // let symbol = false;
       let code=0;
       const postKey = eachpost.key;
       const childData = eachpost.val();
@@ -215,7 +216,7 @@ function getPost(){
         if(likes.includes(UID)){
           // symbol = "&#x1F497";
           // symbol="&#x2764;";
-          symbol=true;
+          // symbol=true;
           code=1;
         }
         let date=childData.date;
@@ -224,7 +225,7 @@ function getPost(){
         date=childData.date.toString().substring(6,8)+'/'+childData.date.toString().substring(4,6)+'/'+childData.date.toString().substring(0,4)+' '+childData.date.toString().substring(8,10)+':'+childData.date.toString().substring(10,12);
       var likeimg;
 
-        if(symbol){
+        if(code == 1){
           likeimg="<img src='img/liked.svg'/>";
         }else{
           likeimg = "<img src='img/unlike.svg'>";
@@ -244,7 +245,7 @@ function getPost(){
         </div>
       </div>`;
       
-      console.log(childData.owner.id+' '+postKey);
+      // console.log(childData.owner.id+' '+postKey);
 
     });
   });
@@ -284,7 +285,7 @@ function getProfile(ownerid) {
     bio = (arg.val()['bio'] == undefined) ? "":arg.val()['bio'];
     phone = (arg.val()['phone'] == undefined) ? "" : arg.val()['phone'];
     bday = (arg.val()['bday'] == undefined) ? "" : arg.val()['bday'];
-    console.log(ownername);
+    // console.log(ownername);
     var profcard;
     if(ownerid == UID){
        profcard = `
@@ -373,7 +374,7 @@ function getImg(loc,elt){
     // xhr.send();
 
     img.src = url;
-    console.log(url);
+    // console.log(url);
     // img.onerror = "this.alt='hi'";
   }).catch(function(error) {
     // A full list of error codes is available at
@@ -425,7 +426,7 @@ function uploadImg(elt){
     // Handle successful uploads on complete
     // For instance, get the download URL: https://firebasestorage.googleapis.com/...
     uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-      console.log('File available at', downloadURL);
+      // console.log('File available at', downloadURL);
       location.reload();
     });
   });
